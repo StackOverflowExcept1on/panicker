@@ -18,10 +18,12 @@ fn my_panic(panic_info: &core::panic::PanicInfo) -> ! {
 
     let mut debug_msg = ArrayString::<1024>::new();
     let _ = write!(&mut debug_msg, "panicked with '{message}' at '{location}'");
-    let _ = debug_msg.try_push_str("\0");
 
-    unsafe {
-        libc::puts(debug_msg.as_ptr() as *const _);
-        libc::exit(libc::EXIT_FAILURE)
+    if debug_msg.try_push_str("\0").is_ok() {
+        unsafe {
+            libc::puts(debug_msg.as_ptr() as *const _);
+        }
     }
+
+    unsafe { libc::exit(libc::EXIT_FAILURE) }
 }
